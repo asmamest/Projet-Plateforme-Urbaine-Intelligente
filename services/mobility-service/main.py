@@ -94,3 +94,80 @@ app.include_router(horaires.router)
 app.include_router(trafic.router)
 app.include_router(disponibilite.router)
 app.include_router(lignes.router)
+
+# ============================================================================
+# ROUTES SYSTÈME
+# ============================================================================
+
+@app.get("/", tags=["Système"], summary="Page d'accueil")
+async def root():
+    """
+    Point d'entrée principal de l'API.
+    Retourne les informations de base du service.
+    """
+    return {
+        "service": settings.app_name,
+        "version": settings.app_version,
+        "status": "operational",
+        "documentation": "/docs",
+        "endpoints": {
+            "horaires": "/horaires/{ligne}",
+            "trafic": "/trafic",
+            "disponibilite": "/disponibilite",
+            "lignes": "/lignes"
+        }
+    }
+
+@app.get("/health", tags=["Système"], summary="Health check")
+async def health_check():
+    """
+    Endpoint de vérification de santé du service.
+    Utilisé par Docker et les orchestrateurs (Kubernetes, etc.)
+    
+    Retourne:
+    - **status**: État du service (healthy/unhealthy)
+    - **version**: Version de l'application
+    - **uptime**: Temps depuis le démarrage
+    """
+    return {
+        "status": "healthy",
+        "service": settings.app_name,
+        "version": settings.app_version
+    }
+
+# ============================================================================
+# GESTIONNAIRE D'ERREURS GLOBAL
+# ============================================================================
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Gestionnaire d'erreurs global pour capturer toutes les exceptions non gérées
+    """
+    logger.error(f"Erreur non gérée: {exc}", exc_info=True)
+    
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": "Erreur interne du serveur",
+            "message": str(exc) if settings.debug else "Une erreur s'est produite",
+            "path": str(request.url)
+        }
+    )
+
+# ============================================================================
+# POINT D'ENTRÉE POUR EXÉCUTION DIRECTE
+# ============================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    uvicorn.run(
+        "main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
+        log_level="info"
+    )
+    
+    
