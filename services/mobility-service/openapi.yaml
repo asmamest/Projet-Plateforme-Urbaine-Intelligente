@@ -1,0 +1,587 @@
+components:
+  schemas:
+    DisponibiliteItem:
+      description: Disponibilité pour une ligne
+      properties:
+        derniere_maj:
+          format: date-time
+          title: Derniere Maj
+          type: string
+        ligne_id:
+          title: Ligne Id
+          type: string
+        taux_disponibilite:
+          description: Taux de disponibilité en %
+          maximum: 100.0
+          minimum: 0.0
+          title: Taux Disponibilite
+          type: number
+        vehicules_en_service:
+          description: Véhicules actuellement en service
+          title: Vehicules En Service
+          type: integer
+        vehicules_total:
+          description: Nombre total de véhicules
+          title: Vehicules Total
+          type: integer
+      required:
+      - ligne_id
+      - vehicules_total
+      - vehicules_en_service
+      - taux_disponibilite
+      - derniere_maj
+      title: DisponibiliteItem
+      type: object
+    DisponibiliteResponse:
+      description: Réponse globale de disponibilité
+      properties:
+        disponibilites:
+          items:
+            $ref: '#/components/schemas/DisponibiliteItem'
+          title: Disponibilites
+          type: array
+        nombre_lignes:
+          title: Nombre Lignes
+          type: integer
+        timestamp:
+          format: date-time
+          title: Timestamp
+          type: string
+      required:
+      - timestamp
+      - nombre_lignes
+      - disponibilites
+      title: DisponibiliteResponse
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    HoraireItem:
+      description: Schéma représentant un horaire de passage
+      properties:
+        destination:
+          example: Centre-Ville
+          title: Destination
+          type: string
+        heure_arrivee:
+          example: 08:40
+          title: Heure Arrivee
+          type: string
+        heure_depart:
+          example: 08:15
+          title: Heure Depart
+          type: string
+        id:
+          title: Id
+          type: string
+        ligne_id:
+          title: Ligne Id
+          type: string
+        quai:
+          example: A
+          title: Quai
+          type: string
+        station:
+          example: Gare Sud
+          title: Station
+          type: string
+      required:
+      - id
+      - ligne_id
+      - destination
+      - heure_depart
+      - heure_arrivee
+      - station
+      - quai
+      title: HoraireItem
+      type: object
+    HorairesResponse:
+      description: Réponse contenant la liste des horaires
+      properties:
+        horaires:
+          items:
+            $ref: '#/components/schemas/HoraireItem'
+          title: Horaires
+          type: array
+        ligne:
+          description: Numéro de la ligne
+          title: Ligne
+          type: string
+        nombre_horaires:
+          title: Nombre Horaires
+          type: integer
+      required:
+      - ligne
+      - nombre_horaires
+      - horaires
+      title: HorairesResponse
+      type: object
+    LigneCreate:
+      description: Schéma pour la création d'une ligne
+      properties:
+        actif:
+          default: true
+          description: Ligne active ou non
+          title: Actif
+          type: boolean
+        nom:
+          description: Nom de la ligne
+          example: Centre-Ville - Banlieue
+          title: Nom
+          type: string
+        numero:
+          description: Numéro de la ligne
+          example: L1
+          title: Numero
+          type: string
+        terminus_debut:
+          description: Terminus de départ
+          example: Gare Centrale
+          title: Terminus Debut
+          type: string
+        terminus_fin:
+          description: Terminus d'arrivée
+          example: Aéroport
+          title: Terminus Fin
+          type: string
+        type_transport:
+          description: Type de transport
+          example: metro
+          title: Type Transport
+          type: string
+      required:
+      - numero
+      - nom
+      - type_transport
+      - terminus_debut
+      - terminus_fin
+      title: LigneCreate
+      type: object
+    LigneResponse:
+      description: Schéma de réponse pour une ligne
+      properties:
+        actif:
+          default: true
+          description: Ligne active ou non
+          title: Actif
+          type: boolean
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        id:
+          description: Identifiant unique de la ligne
+          title: Id
+          type: string
+        nom:
+          description: Nom de la ligne
+          example: Centre-Ville - Banlieue
+          title: Nom
+          type: string
+        numero:
+          description: Numéro de la ligne
+          example: L1
+          title: Numero
+          type: string
+        terminus_debut:
+          description: Terminus de départ
+          example: Gare Centrale
+          title: Terminus Debut
+          type: string
+        terminus_fin:
+          description: Terminus d'arrivée
+          example: Aéroport
+          title: Terminus Fin
+          type: string
+        type_transport:
+          description: Type de transport
+          example: metro
+          title: Type Transport
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - numero
+      - nom
+      - type_transport
+      - terminus_debut
+      - terminus_fin
+      - id
+      - created_at
+      - updated_at
+      title: LigneResponse
+      type: object
+    LigneUpdate:
+      description: Schéma pour la mise à jour d'une ligne
+      properties:
+        actif:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Actif
+        nom:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Nom
+        numero:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Numero
+        terminus_debut:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Terminus Debut
+        terminus_fin:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Terminus Fin
+        type_transport:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type Transport
+      title: LigneUpdate
+      type: object
+    TraficItem:
+      description: État du trafic pour une ligne
+      properties:
+        ligne_id:
+          title: Ligne Id
+          type: string
+        message:
+          default: ''
+          description: Message d'information
+          title: Message
+          type: string
+        retard_minutes:
+          default: 0
+          description: Retard en minutes
+          title: Retard Minutes
+          type: integer
+        statut:
+          description: État du trafic
+          example: normal
+          title: Statut
+          type: string
+        timestamp:
+          format: date-time
+          title: Timestamp
+          type: string
+      required:
+      - ligne_id
+      - statut
+      - timestamp
+      title: TraficItem
+      type: object
+    TraficResponse:
+      description: Réponse globale de l'état du trafic
+      properties:
+        derniere_maj:
+          format: date-time
+          title: Derniere Maj
+          type: string
+        nombre_lignes:
+          title: Nombre Lignes
+          type: integer
+        trafic:
+          items:
+            $ref: '#/components/schemas/TraficItem'
+          title: Trafic
+          type: array
+      required:
+      - derniere_maj
+      - nombre_lignes
+      - trafic
+      title: TraficResponse
+      type: object
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+info:
+  description: "\n    ## Service REST de Mobilité Intelligente\n    \n    Ce service\
+    \ fait partie de la plateforme urbaine intelligente et fournit:\n    \n    * \U0001F4C5\
+    \ **Consultation des horaires** de transport en temps réel\n    * \U0001F6A6 **État\
+    \ du trafic** avec retards et perturbations\n    * \U0001F68C **Disponibilité\
+    \ des véhicules** par ligne\n    * \U0001F527 **Gestion CRUD complète** des lignes\
+    \ de transport\n    \n    ### Architecture\n    \n    - **Protocole**: REST API\
+    \ (FastAPI)\n    - **Format**: JSON\n    - **Documentation**: OpenAPI 3.0\n  \
+    \  - **Conteneurisation**: Docker\n    \n    ### Endpoints principaux\n    \n\
+    \    - `GET /horaires/{ligne}` - Horaires d'une ligne\n    - `GET /trafic` - État\
+    \ du trafic global\n    - `GET /disponibilite` - Disponibilité des véhicules\n\
+    \    - `GET /lignes` - Liste des lignes\n    - `POST /lignes` - Créer une ligne\n\
+    \    - `PUT /lignes/{id}` - Modifier une ligne\n    - `DELETE /lignes/{id}` -\
+    \ Supprimer une ligne\n    "
+  title: Service Mobilité Intelligente
+  version: 1.0.0
+openapi: 3.1.0
+paths:
+  /:
+    get:
+      description: 'Point d''entrée principal de l''API.
+
+        Retourne les informations de base du service.'
+      operationId: root__get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Page d'accueil
+      tags:
+      - Système
+  /disponibilite:
+    get:
+      description: 'Récupère la disponibilité des véhicules pour toutes les lignes.
+
+
+        Retourne pour chaque ligne:
+
+        - Le nombre total de véhicules
+
+        - Le nombre de véhicules actuellement en service
+
+        - Le taux de disponibilité en pourcentage'
+      operationId: get_disponibilite_disponibilite_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisponibiliteResponse'
+          description: Successful Response
+      summary: Obtenir la disponibilité des véhicules
+      tags:
+      - Disponibilité
+  /health:
+    get:
+      description: 'Endpoint de vérification de santé du service.
+
+        Utilisé par Docker et les orchestrateurs (Kubernetes, etc.)
+
+
+        Retourne:
+
+        - **status**: État du service (healthy/unhealthy)
+
+        - **version**: Version de l''application
+
+        - **uptime**: Temps depuis le démarrage'
+      operationId: health_check_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Health check
+      tags:
+      - Système
+  /horaires/{ligne}:
+    get:
+      description: 'Récupère tous les horaires de passage pour une ligne donnée.
+
+
+        - **ligne**: Numéro de la ligne à consulter
+
+
+        Retourne la liste complète des horaires avec les informations de départ, arrivée
+        et quai.'
+      operationId: get_horaires_horaires__ligne__get
+      parameters:
+      - description: 'Numéro de la ligne (ex: L1, B15)'
+        example: L1
+        in: path
+        name: ligne
+        required: true
+        schema:
+          description: 'Numéro de la ligne (ex: L1, B15)'
+          title: Ligne
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorairesResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Consulter les horaires d'une ligne
+      tags:
+      - Horaires
+  /lignes:
+    get:
+      description: Récupère la liste complète de toutes les lignes de transport disponibles.
+      operationId: get_lignes_lignes_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LigneResponse'
+                title: Response Get Lignes Lignes Get
+                type: array
+          description: Successful Response
+      summary: Lister toutes les lignes
+      tags:
+      - Lignes
+    post:
+      description: 'Crée une nouvelle ligne de transport dans le système.
+
+
+        - **numero**: Numéro unique de la ligne (ex: L1, B15)
+
+        - **nom**: Nom descriptif de la ligne
+
+        - **type_transport**: Type de véhicule (bus, metro, train, tramway)
+
+        - **terminus_debut**: Station de départ
+
+        - **terminus_fin**: Station d''arrivée'
+      operationId: create_ligne_lignes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LigneCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LigneResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Créer une nouvelle ligne
+      tags:
+      - Lignes
+  /lignes/{id}:
+    delete:
+      description: 'Supprime définitivement une ligne du système.
+
+
+        **Attention**: Cette action est irréversible.'
+      operationId: delete_ligne_lignes__id__delete
+      parameters:
+      - description: Identifiant de la ligne à supprimer
+        in: path
+        name: id
+        required: true
+        schema:
+          description: Identifiant de la ligne à supprimer
+          title: Id
+          type: string
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Supprimer une ligne
+      tags:
+      - Lignes
+    put:
+      description: 'Met à jour les informations d''une ligne existante.
+
+
+        Seuls les champs fournis seront mis à jour, les autres resteront inchangés.'
+      operationId: update_ligne_lignes__id__put
+      parameters:
+      - description: Identifiant de la ligne
+        in: path
+        name: id
+        required: true
+        schema:
+          description: Identifiant de la ligne
+          title: Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LigneUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LigneResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Mettre à jour une ligne
+      tags:
+      - Lignes
+  /trafic:
+    get:
+      description: 'Récupère l''état du trafic en temps réel pour toutes les lignes.
+
+
+        Retourne pour chaque ligne:
+
+        - Le statut actuel (normal, retard, annulé, perturbé)
+
+        - Le retard estimé en minutes
+
+        - Un message d''information si nécessaire'
+      operationId: get_trafic_trafic_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraficResponse'
+          description: Successful Response
+      summary: Obtenir l'état du trafic
+      tags:
+      - Trafic
