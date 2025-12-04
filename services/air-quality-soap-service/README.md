@@ -64,3 +64,115 @@ docker-compose down
 ## 📖 Utilisation
 
 ### Accéder au WSDL
+
+http://localhost:8000/?wsdl
+
+### Tester avec le client Python
+
+```bash
+# Assurer que le service est lancé
+python test_soap_client.py
+```
+
+### Exemples de requêtes SOAP
+
+Voir le fichier `docs/soap_examples.xml` pour tous les exemples.
+
+#### Exemple: GetAQI
+
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Body>
+      <tns:GetAQI>
+         <tns:zone>downtown</tns:zone>
+      </tns:GetAQI>
+   </soapenv:Body>
+</soapenv:Envelope>
+```
+
+#### Exemple: CompareZones
+
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Body>
+      <tns:CompareZones>
+         <tns:zoneA>park</tns:zoneA>
+         <tns:zoneB>industrial</tns:zoneB>
+      </tns:CompareZones>
+   </soapenv:Body>
+</soapenv:Envelope>
+```
+
+### Zones disponibles (mock data)
+
+- `downtown` - Centre-ville
+- `industrial` - Zone industrielle
+- `residential` - Zone résidentielle
+- `park` - Parc urbain
+- `suburb` - Banlieue
+- `airport` - Aéroport
+- `harbor` - Port
+- `university` - Campus universitaire
+
+## 🧪 Tests
+
+### Lancer les tests unitaires
+
+```bash
+# Tous les tests
+pytest
+
+# Avec couverture
+pytest --cov=. --cov-report=html
+
+# Tests spécifiques
+pytest tests/test_service.py
+pytest tests/test_repository.py
+```
+
+### Linter
+
+```bash
+# Avec ruff
+ruff check .
+
+# Auto-fix
+ruff check --fix .
+```
+
+## 📊 Structure du projet
+
+air-quality-soap-service/
+├── main.py
+├── models/
+│ ├── **init**.py
+│ └── air_quality_models.py
+├── services/
+│ ├── **init**.py
+│ └── air_quality_service.py
+├── repositories/
+│ ├── **init**.py
+│ └── data_repository.py
+├── utils/
+│ ├── **init**.py
+│ └── logger.py
+├── wsdl/
+│ └── air_quality.wsdl
+├── docs/
+│ └── soap_examples.xml
+├── logs/
+│ └── .gitkeep
+├── tests/
+│ ├── **init**.py
+│ ├── test_service.py
+│ └── test_repository.py
+├── data/
+│ └── air_quality_data.csv
+├── test_soap_client.py
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── .env.example
+└── README.md
