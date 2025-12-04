@@ -64,5 +64,3 @@ class PollutantModel(Base):
     
     def __repr__(self):
         return f"<Pollutant {self.nom}={self.valeur}{self.unite}>"
-
-        
