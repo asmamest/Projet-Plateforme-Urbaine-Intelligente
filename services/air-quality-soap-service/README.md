@@ -145,34 +145,34 @@ ruff check --fix .
 ## 📊 Structure du projet
 
 air-quality-soap-service/
-├── main.py
-├── models/
+├── main.py # Point d'entrée du service SOAP
+├── models/ # Définitions des modèles de données
 │ ├── **init**.py
-│ └── air_quality_models.py
-├── services/
+│ └── air_quality_models.py # Modèles pour la qualité de l'air (AQI, polluants, etc.)
+├── services/ # Logique métier du service SOAP
 │ ├── **init**.py
-│ └── air_quality_service.py
-├── repositories/
+│ └── air_quality_service.py# Implémentation de AirQualityService
+├── repositories/ # Accès aux données
 │ ├── **init**.py
-│ └── data_repository.py
-├── utils/
+│ └── data_repository.py # Gestion des sources de données (CSV, DB, etc.)
+├── utils/ # Fonctions utilitaires
 │ ├── **init**.py
-│ └── logger.py
-├── wsdl/
-│ └── air_quality.wsdl
-├── docs/
-│ └── soap_examples.xml
-├── logs/
+│ └── logger.py # Configuration et gestion des logs
+├── wsdl/ # Définition du service SOAP
+│ └── air_quality.wsdl # WSDL décrivant le service
+├── docs/ # Documentation et exemples
+│ └── soap_examples.xml # Exemples de requêtes/réponses SOAP
+├── logs/ # Stockage des logs générés
 │ └── .gitkeep
-├── tests/
+├── tests/ # Tests unitaires et d’intégration
 │ ├── **init**.py
-│ ├── test_service.py
-│ └── test_repository.py
-├── data/
-│ └── air_quality_data.csv
-├── test_soap_client.py
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-└── README.md
+│ ├── test_service.py # Tests du service AirQualityService
+│ └── test_repository.py # Tests du repository de données
+├── data/ # Données statiques ou d’exemple
+│ └── air_quality_data.csv # Jeu de données pour tests ou simulation
+├── test_soap_client.py # Script de test client SOAP
+├── Dockerfile # Configuration pour containerisation
+├── docker-compose.yml # Déploiement multi-services
+├── requirements.txt # Dépendances Python
+├── .env.example # Exemple de fichier de configuration environnement
+└── README.md # Documentation du projet
