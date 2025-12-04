@@ -1,347 +1,250 @@
 """
-Implémentation du service SOAP - Logique métier
+Service métier Air Quality
 """
-from spyne import Application, rpc, ServiceBase, Fault
-from spyne.protocol.soap import Soap11
-from spyne.server.wsgi import WsgiApplication
+import time
+from datetime import datetime, timedelta
+from spyne import Fault
 
 from models.air_quality_models import (
-    AirQualityResult, PollutantList, Pollutant, ZoneComparison,
-    HistoricalSeries, HistoricalDataPoint, HealthStatus
+    AirQualityResult, PollutantList, ZoneComparison,
+    HistoricalSeries, HealthStatus, Pollutant, DataPoint
 )
-from repositories.data_repository import AirQualityRepository
-from database.connection import get_db
-from datetime import datetime
-import logging
-import time
+from repositories.data_repository import DataRepository
+from utils.logger import setup_logger
 
-logger = logging.getLogger("air-quality-soap")
+logger = setup_logger('service', 'logs/service.log')
 
-# Temps de démarrage pour le uptime
 START_TIME = time.time()
+SERVICE_VERSION = "1.0.0"
 
-class AirQualityService(ServiceBase):
-    """Service SOAP pour la qualité de l'air"""
+
+class AirQualityServiceImpl:
     
-    @rpc(Unicode, _returns=AirQualityResult)
-    def GetAQI(ctx, zone):
-        """
-        Récupère l'indice AQI pour une zone donnée
-        
-        Args:
-            zone: Code de la zone (ex: CENTRE, NORD, SUD, EST)
-            
-        Returns:
-            AirQualityResult avec AQI et informations
-        """
-        logger.info(f"GetAQI appelé pour zone: {zone}")
-        
+    def __init__(self):
+        self.repository = DataRepository()
+        logger.info("Service Air Quality initialisé")
+    
+    def get_aqi(self, zone: str) -> AirQualityResult:
         if not zone or zone.strip() == "":
-            raise Fault("Client", "Le code de zone ne peut pas être vide")
+            raise Fault(faultcode="Client", faultstring="Zone vide")
         
-        db = next(get_db())
         try:
-            repo = AirQualityRepository(db)
+            data = self.repository.get_current_data(zone)
+            if not data:
+                raise Fault(faultcode="Server", faultstring=f"Zone '{zone}' introuvable")
             
-            # Récupérer la zone
-            zone_obj = repo.get_zone_by_code(zone)
-            if not zone_obj:
-                raise Fault("Client", f"Zone '{zone}' introuvable")
+            aqi = data.get('aqi', 0)
+            category = self._get_aqi_category(aqi)
             
-            # Récupérer la dernière mesure
-            measurement = repo.get_latest_measurement(zone_obj.id)
-            if not measurement:
-                raise Fault("Server", f"Aucune mesure disponible pour la zone '{zone}'")
+            result = AirQualityResult()
+            result.zone = zone
+            result.aqi = aqi
+            result.category = category
+            result.timestamp = datetime.now()
+            result.description = self._get_aqi_description(category)
             
-            # Déterminer les recommandations
-            recommendations = _get_recommendations(measurement.aqi)
-            description = _get_aqi_description(measurement.aqi)
-            
-            result = AirQualityResult(
-                zone=zone.upper(),
-                aqi=measurement.aqi,
-                status=measurement.status,
-                description=description,
-                timestamp=measurement.timestamp,
-                recommendations=recommendations
-            )
-            
-            logger.info(f"GetAQI réussi pour {zone}: AQI={measurement.aqi}")
             return result
-            
         except Fault:
             raise
         except Exception as e:
-            logger.error(f"Erreur GetAQI: {e}")
-            raise Fault("Server", f"Erreur interne: {str(e)}")
-        finally:
-            db.close()
+            logger.error(f"Erreur get_aqi: {str(e)}")
+            raise Fault(faultcode="Server", faultstring=str(e))
     
-    @rpc(Unicode, _returns=PollutantList)
-    def GetPollutants(ctx, zone):
-        """
-        Récupère les niveaux de polluants pour une zone
-        
-        Args:
-            zone: Code de la zone
-            
-        Returns:
-            PollutantList avec tous les polluants mesurés
-        """
-        logger.info(f"GetPollutants appelé pour zone: {zone}")
-        
+    def get_pollutants(self, zone: str) -> PollutantList:
         if not zone or zone.strip() == "":
-            raise Fault("Client", "Le code de zone ne peut pas être vide")
+            raise Fault(faultcode="Client", faultstring="Zone vide")
         
-        db = next(get_db())
         try:
-            repo = AirQualityRepository(db)
+            data = self.repository.get_current_data(zone)
+            if not data:
+                raise Fault(faultcode="Server", faultstring=f"Zone '{zone}' introuvable")
             
-            zone_obj = repo.get_zone_by_code(zone)
-            if not zone_obj:
-                raise Fault("Client", f"Zone '{zone}' introuvable")
+            timestamp = datetime.now()
+            pollutants = []
             
-            measurement = repo.get_latest_measurement(zone_obj.id)
-            if not measurement:
-                raise Fault("Server", f"Aucune mesure disponible pour la zone '{zone}'")
+            for name, key in [('PM2.5', 'pm25'), ('PM10', 'pm10'), 
+                             ('NO2', 'no2'), ('CO2', 'co2'), 
+                             ('O3', 'o3'), ('SO2', 'so2')]:
+                if key in data:
+                    p = Pollutant()
+                    p.name = name
+                    p.value = data[key]
+                    p.unit = self._get_unit(key)
+                    p.timestamp = timestamp
+                    p.status = self._get_pollutant_status(data[key], key)
+                    pollutants.append(p)
             
-            pollutants_db = repo.get_pollutants_for_measurement(measurement.id)
+            result = PollutantList()
+            result.zone = zone
+            result.pollutants = pollutants
+            result.timestamp = timestamp
             
-            pollutants = [
-                Pollutant(
-                    nom=p.nom,
-                    valeur=p.valeur,
-                    unite=p.unite,
-                    status=p.status,
-                    timestamp=measurement.timestamp
-                )
-                for p in pollutants_db
-            ]
-            
-            result = PollutantList(
-                zone=zone.upper(),
-                pollutants=pollutants,
-                timestamp=datetime.now()
-            )
-            
-            logger.info(f"GetPollutants réussi pour {zone}: {len(pollutants)} polluants")
             return result
-            
         except Fault:
             raise
         except Exception as e:
-            logger.error(f"Erreur GetPollutants: {e}")
-            raise Fault("Server", f"Erreur interne: {str(e)}")
-        finally:
-            db.close()
+            raise Fault(faultcode="Server", faultstring=str(e))
     
-    @rpc(Unicode, Unicode, _returns=ZoneComparison)
-    def CompareZones(ctx, zoneA, zoneB):
-        """
-        Compare la qualité de l'air entre deux zones
-        
-        Args:
-            zoneA: Code de la première zone
-            zoneB: Code de la deuxième zone
-            
-        Returns:
-            ZoneComparison avec analyse comparative
-        """
-        logger.info(f"CompareZones appelé: {zoneA} vs {zoneB}")
-        
+    def compare_zones(self, zoneA: str, zoneB: str) -> ZoneComparison:
         if not zoneA or not zoneB:
-            raise Fault("Client", "Les codes de zone ne peuvent pas être vides")
+            raise Fault(faultcode="Client", faultstring="Zones vides")
         
-        if zoneA.upper() == zoneB.upper():
-            raise Fault("Client", "Les deux zones doivent être différentes")
-        
-        db = next(get_db())
         try:
-            repo = AirQualityRepository(db)
+            dataA = self.repository.get_current_data(zoneA)
+            dataB = self.repository.get_current_data(zoneB)
             
-            # Zone A
-            zone_obj_a = repo.get_zone_by_code(zoneA)
-            if not zone_obj_a:
-                raise Fault("Client", f"Zone '{zoneA}' introuvable")
+            if not dataA:
+                raise Fault(faultcode="Server", faultstring=f"Zone '{zoneA}' introuvable")
+            if not dataB:
+                raise Fault(faultcode="Server", faultstring=f"Zone '{zoneB}' introuvable")
             
-            measurement_a = repo.get_latest_measurement(zone_obj_a.id)
-            if not measurement_a:
-                raise Fault("Server", f"Aucune mesure pour la zone '{zoneA}'")
+            aqiA = dataA.get('aqi', 0)
+            aqiB = dataB.get('aqi', 0)
             
-            # Zone B
-            zone_obj_b = repo.get_zone_by_code(zoneB)
-            if not zone_obj_b:
-                raise Fault("Client", f"Zone '{zoneB}' introuvable")
+            result = ZoneComparison()
+            result.zoneA = zoneA
+            result.zoneB = zoneB
+            result.aqiA = aqiA
+            result.aqiB = aqiB
+            result.cleanest_zone = zoneA if aqiA < aqiB else zoneB
+            result.difference = abs(aqiA - aqiB)
+            result.recommendations = self._get_recommendations(aqiA, aqiB, zoneA, zoneB)
+            result.timestamp = datetime.now()
             
-            measurement_b = repo.get_latest_measurement(zone_obj_b.id)
-            if not measurement_b:
-                raise Fault("Server", f"Aucune mesure pour la zone '{zoneB}'")
-            
-            # Comparaison
-            cleaner = zoneA.upper() if measurement_a.aqi < measurement_b.aqi else zoneB.upper()
-            diff = abs(measurement_a.aqi - measurement_b.aqi)
-            
-            # Détails de comparaison
-            details = _build_comparison_details(
-                zone_obj_a.nom, measurement_a,
-                zone_obj_b.nom, measurement_b
-            )
-            
-            recommendations = _build_comparison_recommendations(
-                measurement_a.aqi, measurement_b.aqi, cleaner
-            )
-            
-            result = ZoneComparison(
-                zoneA=zoneA.upper(),
-                zoneB=zoneB.upper(),
-                aqi_A=measurement_a.aqi,
-                aqi_B=measurement_b.aqi,
-                cleaner_zone=cleaner,
-                difference_aqi=diff,
-                recommendations=recommendations,
-                comparison_details=details
-            )
-            
-            logger.info(f"CompareZones réussi: {cleaner} est plus propre (diff={diff})")
             return result
-            
         except Fault:
             raise
         except Exception as e:
-            logger.error(f"Erreur CompareZones: {e}")
-            raise Fault("Server", f"Erreur interne: {str(e)}")
-        finally:
-            db.close()
+            raise Fault(faultcode="Server", faultstring=str(e))
     
-    @rpc(Unicode, DateTime, DateTime, Unicode, _returns=HistoricalSeries)
-    def GetHistory(ctx, zone, startDate, endDate, granularity):
-        """
-        Récupère l'historique des mesures pour une période
-        
-        Args:
-            zone: Code de la zone
-            startDate: Date de début
-            endDate: Date de fin
-            granularity: Granularité (hourly, daily)
-            
-        Returns:
-            HistoricalSeries avec les données temporelles
-        """
-        logger.info(f"GetHistory appelé: {zone}, {startDate} à {endDate}, {granularity}")
-        
+    def get_history(self, zone: str, start_date, end_date, granularity: str) -> HistoricalSeries:
         if not zone:
-            raise Fault("Client", "Le code de zone ne peut pas être vide")
-        
-        if not startDate or not endDate:
-            raise Fault("Client", "Les dates de début et fin sont obligatoires")
-        
-        if startDate >= endDate:
-            raise Fault("Client", "La date de début doit être antérieure à la date de fin")
-        
+            raise Fault(faultcode="Client", faultstring="Zone vide")
         if granularity not in ['hourly', 'daily']:
-            raise Fault("Client", "Granularité invalide. Valeurs acceptées: hourly, daily")
+            raise Fault(faultcode="Client", faultstring="Granularité invalide (hourly/daily)")
+        if start_date >= end_date:
+            raise Fault(faultcode="Client", faultstring="Date de début >= date de fin")
         
-        db = next(get_db())
         try:
-            repo = AirQualityRepository(db)
+            history = self.repository.get_historical_data(zone, start_date, end_date, granularity)
             
-            zone_obj = repo.get_zone_by_code(zone)
-            if not zone_obj:
-                raise Fault("Client", f"Zone '{zone}' introuvable")
+            data_points = []
+            for entry in history:
+                dp = DataPoint()
+                dp.timestamp = entry['timestamp']
+                dp.aqi = entry.get('aqi', 0)
+                dp.pm25 = entry.get('pm25')
+                dp.pm10 = entry.get('pm10')
+                dp.no2 = entry.get('no2')
+                dp.co2 = entry.get('co2')
+                dp.o3 = entry.get('o3')
+                dp.so2 = entry.get('so2')
+                data_points.append(dp)
             
-            # Limite de 1000 points
-            measurements = repo.get_historical_data(
-                zone_obj.id, startDate, endDate, limit=1000
-            )
+            result = HistoricalSeries()
+            result.zone = zone
+            result.start_date = start_date
+            result.end_date = end_date
+            result.granularity = granularity
+            result.data_points = data_points
             
-            if not measurements:
-                raise Fault("Server", f"Aucune donnée historique pour la période demandée")
-            
-            data_points = [
-                HistoricalDataPoint(
-                    timestamp=m.timestamp,
-                    aqi=m.aqi,
-                    status=m.status
-                )
-                for m in measurements
-            ]
-            
-            result = HistoricalSeries(
-                zone=zone.upper(),
-                start_date=startDate,
-                end_date=endDate,
-                granularity=granularity,
-                data_points=data_points,
-                count=len(data_points)
-            )
-            
-            logger.info(f"GetHistory réussi: {len(data_points)} points retournés")
             return result
-            
         except Fault:
             raise
         except Exception as e:
-            logger.error(f"Erreur GetHistory: {e}")
-            raise Fault("Server", f"Erreur interne: {str(e)}")
-        finally:
-            db.close()
+            raise Fault(faultcode="Server", faultstring=str(e))
     
-    @rpc(Unicode, Float, _returns=PollutantList)
-    def FilterPollutants(ctx, zone, threshold):
-        """
-        Filtre les polluants dépassant un seuil
+    def filter_pollutants(self, zone: str, threshold: float) -> PollutantList:
+        if not zone:
+            raise Fault(faultcode="Client", faultstring="Zone vide")
+        if threshold < 0:
+            raise Fault(faultcode="Client", faultstring="Seuil négatif")
         
-        Args:
-            zone: Code de la zone
-            threshold: Seuil minimal de valeur
-            
-        Returns:
-            PollutantList avec polluants filtré """
-            
-    
-    def get_pollutants_above_threshold(
-        self, 
-        measurement_id: str, 
-        threshold: float
-    ) -> List[PollutantModel]:
-        """Récupère les polluants dépassant un seuil"""
         try:
-            return (
-                self.db.query(PollutantModel)
-                .filter(
-                    and_(
-                        PollutantModel.measurement_id == measurement_id,
-                        PollutantModel.valeur >= threshold
-                    )
-                )
-                .all()
-            )
+            all_pollutants = self.get_pollutants(zone)
+            filtered = [p for p in all_pollutants.pollutants if p.value > threshold]
+            
+            result = PollutantList()
+            result.zone = zone
+            result.pollutants = filtered
+            result.timestamp = datetime.now()
+            
+            return result
+        except Fault:
+            raise
         except Exception as e:
-            logger.error(f"Erreur get_pollutants_above_threshold: {e}")
-            return []
+            raise Fault(faultcode="Server", faultstring=str(e))
     
-    def get_historical_data(
-        self,
-        zone_id: str,
-        start_date: datetime,
-        end_date: datetime,
-        limit: int = 1000
-    ) -> List[AirQualityMeasurementModel]:
-        """Récupère les données historiques pour une période"""
+    def health_check(self) -> HealthStatus:
         try:
-            return (
-                self.db.query(AirQualityMeasurementModel)
-                .filter(
-                    and_(
-                        AirQualityMeasurementModel.zone_id == zone_id,
-                        AirQualityMeasurementModel.timestamp >= start_date,
-                        AirQualityMeasurementModel.timestamp <= end_date
-                    )
-                )
-                .order_by(AirQualityMeasurementModel.timestamp.asc())
-                .limit(limit)
-                .all()
-            )
+            db_status = "UP" if self.repository.check_health() else "DOWN"
+            
+            result = HealthStatus()
+            result.status = "UP" if db_status == "UP" else "DEGRADED"
+            result.version = SERVICE_VERSION
+            result.uptime_seconds = int(time.time() - START_TIME)
+            result.database_status = db_status
+            result.last_check = datetime.now()
+            
+            return result
         except Exception as e:
-            logger.error(f"Erreur get_historical_data: {e}")
-            return []
+            logger.error(f"Erreur health_check: {str(e)}")
+            raise Fault(faultcode="Server", faultstring=str(e))
+    
+    def _get_aqi_category(self, aqi: int) -> str:
+        if aqi <= 50:
+            return "Good"
+        elif aqi <= 100:
+            return "Moderate"
+        elif aqi <= 150:
+            return "Unhealthy for Sensitive Groups"
+        elif aqi <= 200:
+            return "Unhealthy"
+        elif aqi <= 300:
+            return "Very Unhealthy"
+        else:
+            return "Hazardous"
+    
+    def _get_aqi_description(self, category: str) -> str:
+        descriptions = {
+            "Good": "La qualité de l'air est satisfaisante",
+            "Moderate": "Qualité acceptable pour la plupart",
+            "Unhealthy for Sensitive Groups": "Risque pour personnes sensibles",
+            "Unhealthy": "Risque pour toute la population",
+            "Very Unhealthy": "Avertissement de santé",
+            "Hazardous": "Alerte sanitaire"
+        }
+        return descriptions.get(category, "Inconnu")
+    
+    def _get_pollutant_status(self, value: float, pollutant_type: str) -> str:
+        thresholds = {
+            'pm25': 35.0, 'pm10': 50.0, 'no2': 100.0,
+            'co2': 1000.0, 'o3': 70.0, 'so2': 75.0
+        }
+        threshold = thresholds.get(pollutant_type, 50.0)
+        
+        if value <= threshold:
+            return "OK"
+        elif value <= threshold * 1.5:
+            return "ALERT"
+        else:
+            return "CRITICAL"
+    
+    def _get_unit(self, pollutant: str) -> str:
+        units = {
+            'pm25': 'µg/m³', 'pm10': 'µg/m³',
+            'no2': 'ppb', 'co2': 'ppm',
+            'o3': 'ppb', 'so2': 'ppb'
+        }
+        return units.get(pollutant, 'unit')
+    
+    def _get_recommendations(self, aqiA: int, aqiB: int, zoneA: str, zoneB: str) -> str:
+        diff = abs(aqiA - aqiB)
+        better = zoneA if aqiA < aqiB else zoneB
+        
+        if diff < 20:
+            return f"Différence mineure. Les deux zones ont une qualité similaire."
+        elif diff < 50:
+            return f"Préférez {better} pour activités extérieures."
+        else:
+            return f"Différence significative. Privilégiez fortement {better}."

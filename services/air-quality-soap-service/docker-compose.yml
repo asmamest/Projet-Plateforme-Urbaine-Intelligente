@@ -1,47 +1,32 @@
 version: '3.8'
 
 services:
-  # Base de données PostgreSQL globale
-  postgres:
-    image: postgres:15-alpine
-    container_name: smart-city-db
-    environment:
-      POSTGRES_USER: smart_city_user
-      POSTGRES_PASSWORD: smart_city_pass
-      POSTGRES_DB: smart_city_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - smart_city_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U smart_city_user -d smart_city_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - smart-city-network
-
-  # Service SOAP Qualité de l'Air
   air-quality-soap:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: air-quality-soap-service
-    environment:
-      DATABASE_URL: postgresql://smart_city_user:smart_city_pass@postgres:5432/smart_city_db
-      SOAP_HOST: 0.0.0.0
-      SOAP_PORT: 8001
     ports:
-      - "8001:8001"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - smart-city-network
+      - "8081:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - LOG_LEVEL=INFO
+      - WORKERS=4
+      - DATA_SOURCE=data/air_quality_data.csv
     volumes:
       - ./logs:/app/logs
-
-volumes:
-  smart_city_data:
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - smartcity-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/?wsdl')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
-  smart-city-network:
+  smartcity-network:
     driver: bridge

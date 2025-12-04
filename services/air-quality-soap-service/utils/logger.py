@@ -1,43 +1,53 @@
 """
-Configuration du logging avec rotation
+Configuration du système de logging
 """
 import logging
-from logging.handlers import RotatingFileHandler
 import os
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
+import uuid
 
-def setup_logger(name: str = "air-quality-soap", log_level: str = "INFO"):
+
+def setup_logger(name: str, log_file: str, level=logging.INFO):
     """
-    Configure le logger avec rotation de fichiers
+    Configurer un logger avec rotation
     """
-    # Créer le dossier logs s'il n'existe pas
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
     
-    # Configuration du logger
-    logger = logging.getLogger(name)
-    logger.setLevel(getattr(logging, log_level.upper()))
-    
-    # Format des logs
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - [%(request_id)s] - %(message)s',
+        '%(asctime)s | %(name)s | %(levelname)s | %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     
-    # Handler pour fichier avec rotation
-    file_handler = RotatingFileHandler(
-        'logs/service.log',
-        maxBytes=10*1024*1024,  # 10MB
+    handler = RotatingFileHandler(
+        log_file,
+        maxBytes=10*1024*1024,  # 10 MB
         backupCount=5
     )
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    handler.setFormatter(formatter)
     
-    # Handler pour console
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
+    
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
     logger.addHandler(console_handler)
     
     return logger
 
-# Logger par défaut
-logger = setup_logger()
+
+def get_request_logger(method: str, params: dict):
+    """
+    Logger avec contexte de requête
+    """
+    request_id = str(uuid.uuid4())[:8]
+    logger = logging.getLogger(f'request.{method}')
+    
+    extra = {
+        'request_id': request_id,
+        'method': method,
+        'params': params
+    }
+    
+    return logging.LoggerAdapter(logger, extra)

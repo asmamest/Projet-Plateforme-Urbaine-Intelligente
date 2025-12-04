@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://smartcity.air-quality.soap"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             targetNamespace="http://smartcity.air-quality.soap"
+             name="AirQualityService">
+    
+    <types>
+        <xsd:schema targetNamespace="http://smartcity.air-quality.soap">
+            <xsd:complexType name="AirQualityResult">
+                <xsd:sequence>
+                    <xsd:element name="zone" type="xsd:string"/>
+                    <xsd:element name="aqi" type="xsd:int"/>
+                    <xsd:element name="category" type="xsd:string"/>
+                    <xsd:element name="timestamp" type="xsd:dateTime"/>
+                    <xsd:element name="description" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <xsd:complexType name="Pollutant">
+                <xsd:sequence>
+                    <xsd:element name="name" type="xsd:string"/>
+                    <xsd:element name="value" type="xsd:float"/>
+                    <xsd:element name="unit" type="xsd:string"/>
+                    <xsd:element name="timestamp" type="xsd:dateTime"/>
+                    <xsd:element name="status" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </types>
+    
+    <message name="GetAQIRequest">
+        <part name="zone" type="xsd:string"/>
+    </message>
+    
+    <message name="GetAQIResponse">
+        <part name="result" type="tns:AirQualityResult"/>
+    </message>
+    
+    <portType name="AirQualityPortType">
+        <operation name="GetAQI">
+            <input message="tns:GetAQIRequest"/>
+            <output message="tns:GetAQIResponse"/>
+        </operation>
+    </portType>
+    
+    <binding name="AirQualityBinding" type="tns:AirQualityPortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetAQI">
+            <soap:operation soapAction="GetAQI"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+    
+    <service name="AirQualityService">
+        <port name="AirQualityPort" binding="tns:AirQualityBinding">
+            <soap:address location="http://localhost:8000/"/>
+        </port>
+    </service>
+</definitions>

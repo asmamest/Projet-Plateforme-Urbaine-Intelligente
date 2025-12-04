@@ -1,29 +1,42 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
+LABEL maintainer="air-quality-service"
+LABEL description="Air Quality SOAP Service pour plateforme Smart City"
+
+# Variables d'environnement
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000 \
+    HOST=0.0.0.0 \
+    LOG_LEVEL=INFO \
+    WORKERS=4
+
+# Créer répertoire de travail
 WORKDIR /app
 
-# Installation des dépendances système
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Installer dépendances système
+RUN apt-get update && apt-get install -y \
     gcc \
-    libpq-dev \
+    libxml2-dev \
+    libxslt-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Installation des dépendances Python
+# Copier requirements et installer dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copie du code source
+# Copier le code source
 COPY . .
 
-# Création du dossier logs
-RUN mkdir -p logs
+# Créer dossiers nécessaires
+RUN mkdir -p logs data wsdl
 
-# Exposition du port
-EXPOSE 8001
+# Exposer le port
+EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8001/health', timeout=2)"
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/?wsdl')"
 
-# Démarrage du service
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8001", "--timeout", "120", "main:app"]
+# Commande de démarrage avec Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "--access-logfile", "logs/access.log", "--error-logfile", "logs/error.log", "main:create_app()"]

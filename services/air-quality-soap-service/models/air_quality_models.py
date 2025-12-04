@@ -1,75 +1,71 @@
 """
-Modèles Spyne (types complexes SOAP)
+Modèles de données pour le service SOAP Air Quality
 """
 from spyne import ComplexModel, Unicode, Integer, Float, DateTime, Array
 
-class Pollutant(ComplexModel):
-    """Polluant individuel"""
-    __namespace__ = "air.quality.service"
-    
-    nom = Unicode(min_occurs=1, doc="Nom du polluant (PM2.5, NO2, etc.)")
-    valeur = Float(min_occurs=1, doc="Valeur mesurée")
-    unite = Unicode(min_occurs=1, doc="Unité de mesure (µg/m³, ppm, etc.)")
-    status = Unicode(min_occurs=1, doc="Statut (OK, MODERATE, ALERT)")
-    timestamp = DateTime(min_occurs=1, doc="Horodatage de la mesure")
 
-class PollutantList(ComplexModel):
-    """Liste de polluants"""
-    __namespace__ = "air.quality.service"
-    
-    zone = Unicode(min_occurs=1, doc="Code de la zone")
-    pollutants = Array(Pollutant, doc="Liste des polluants")
-    timestamp = DateTime(min_occurs=1, doc="Horodatage de la requête")
+class Pollutant(ComplexModel):
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    name = Unicode(min_occurs=1, max_occurs=1)
+    value = Float(min_occurs=1, max_occurs=1)
+    unit = Unicode(min_occurs=1, max_occurs=1)
+    timestamp = DateTime(min_occurs=1, max_occurs=1)
+    status = Unicode(min_occurs=1, max_occurs=1)
+
 
 class AirQualityResult(ComplexModel):
-    """Résultat de la qualité de l'air"""
-    __namespace__ = "air.quality.service"
-    
-    zone = Unicode(min_occurs=1, doc="Code de la zone")
-    aqi = Integer(min_occurs=1, doc="Indice AQI (0-500)")
-    status = Unicode(min_occurs=1, doc="Statut (GOOD, MODERATE, UNHEALTHY, etc.)")
-    description = Unicode(doc="Description textuelle")
-    timestamp = DateTime(min_occurs=1, doc="Horodatage de la mesure")
-    recommendations = Unicode(doc="Recommandations")
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    zone = Unicode(min_occurs=1, max_occurs=1)
+    aqi = Integer(min_occurs=1, max_occurs=1)
+    category = Unicode(min_occurs=1, max_occurs=1)
+    timestamp = DateTime(min_occurs=1, max_occurs=1)
+    description = Unicode(min_occurs=1, max_occurs=1)
+
+
+class PollutantList(ComplexModel):
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    zone = Unicode(min_occurs=1, max_occurs=1)
+    pollutants = Array(Pollutant, min_occurs=0)
+    timestamp = DateTime(min_occurs=1, max_occurs=1)
+
 
 class ZoneComparison(ComplexModel):
-    """Comparaison entre deux zones"""
-    __namespace__ = "air.quality.service"
-    
-    zoneA = Unicode(min_occurs=1, doc="Code zone A")
-    zoneB = Unicode(min_occurs=1, doc="Code zone B")
-    aqi_A = Integer(min_occurs=1, doc="AQI zone A")
-    aqi_B = Integer(min_occurs=1, doc="AQI zone B")
-    cleaner_zone = Unicode(min_occurs=1, doc="Zone la plus propre")
-    difference_aqi = Integer(doc="Différence d'AQI")
-    recommendations = Unicode(doc="Recommandations")
-    comparison_details = Unicode(doc="Détails de la comparaison")
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    zoneA = Unicode(min_occurs=1, max_occurs=1)
+    zoneB = Unicode(min_occurs=1, max_occurs=1)
+    aqiA = Integer(min_occurs=1, max_occurs=1)
+    aqiB = Integer(min_occurs=1, max_occurs=1)
+    cleanest_zone = Unicode(min_occurs=1, max_occurs=1)
+    difference = Integer(min_occurs=1, max_occurs=1)
+    recommendations = Unicode(min_occurs=1, max_occurs=1)
+    timestamp = DateTime(min_occurs=1, max_occurs=1)
 
-class HistoricalDataPoint(ComplexModel):
-    """Point de données historiques"""
-    __namespace__ = "air.quality.service"
-    
-    timestamp = DateTime(min_occurs=1, doc="Horodatage")
-    aqi = Integer(min_occurs=1, doc="Indice AQI")
-    status = Unicode(min_occurs=1, doc="Statut")
+
+class DataPoint(ComplexModel):
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    timestamp = DateTime(min_occurs=1, max_occurs=1)
+    aqi = Integer(min_occurs=1, max_occurs=1)
+    pm25 = Float(min_occurs=0, max_occurs=1)
+    pm10 = Float(min_occurs=0, max_occurs=1)
+    no2 = Float(min_occurs=0, max_occurs=1)
+    co2 = Float(min_occurs=0, max_occurs=1)
+    o3 = Float(min_occurs=0, max_occurs=1)
+    so2 = Float(min_occurs=0, max_occurs=1)
+
 
 class HistoricalSeries(ComplexModel):
-    """Série temporelle historique"""
-    __namespace__ = "air.quality.service"
-    
-    zone = Unicode(min_occurs=1, doc="Code de la zone")
-    start_date = DateTime(min_occurs=1, doc="Date de début")
-    end_date = DateTime(min_occurs=1, doc="Date de fin")
-    granularity = Unicode(min_occurs=1, doc="Granularité (hourly, daily)")
-    data_points = Array(HistoricalDataPoint, doc="Points de données")
-    count = Integer(doc="Nombre de points")
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    zone = Unicode(min_occurs=1, max_occurs=1)
+    start_date = DateTime(min_occurs=1, max_occurs=1)
+    end_date = DateTime(min_occurs=1, max_occurs=1)
+    granularity = Unicode(min_occurs=1, max_occurs=1)
+    data_points = Array(DataPoint, min_occurs=0)
+
 
 class HealthStatus(ComplexModel):
-    """État de santé du service"""
-    __namespace__ = "air.quality.service"
-    
-    status = Unicode(min_occurs=1, doc="État (UP/DOWN)")
-    version = Unicode(min_occurs=1, doc="Version du service")
-    timestamp = DateTime(min_occurs=1, doc="Horodatage")
-    database_status = Unicode(doc="État de la base de données")
-    uptime_seconds = Integer(doc="Temps de fonctionnement en secondes")
+    __namespace__ = 'http://smartcity.air-quality.soap/models'
+    status = Unicode(min_occurs=1, max_occurs=1)
+    version = Unicode(min_occurs=1, max_occurs=1)
+    uptime_seconds = Integer(min_occurs=1, max_occurs=1)
+    database_status = Unicode(min_occurs=1, max_occurs=1)
+    last_check = DateTime(min_occurs=1, max_occurs=1)

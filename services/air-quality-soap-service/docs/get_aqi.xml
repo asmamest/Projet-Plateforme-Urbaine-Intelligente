@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:GetAQI>
+         <tns:zone>downtown</tns:zone>
+      </tns:GetAQI>
+   </soapenv:Body>
+</soapenv:Envelope>

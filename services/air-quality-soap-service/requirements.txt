@@ -1,19 +1,20 @@
-# Framework SOAP
+# SOAP Framework
 spyne==2.14.0
-lxml==5.1.0
-zeep==4.2.1
+lxml==4.9.3
 
-# Serveur HTTP
+# Web Server
 gunicorn==21.2.0
 
-# Base de données
-sqlalchemy==2.0.25
-psycopg2-binary==2.9.9
-python-dotenv==1.0.0
+# SOAP Client (pour tests)
+zeep==4.2.1
 
-# Tests
+# Testing
 pytest==7.4.3
 pytest-cov==4.1.0
 
-# Qualité du code
-ruff==0.1.9
+# Utilities
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Linting (optionnel)
+ruff==0.1.6

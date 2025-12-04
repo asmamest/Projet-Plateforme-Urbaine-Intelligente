@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap-examples>
+    <!-- Exemple 1: GetAQI -->
+    <example name="GetAQI" description="Obtenir l'AQI pour une zone">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:GetAQI>
+         <tns:zone>downtown</tns:zone>
+      </tns:GetAQI>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+        <response>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+   <soapenv:Body>
+      <ns0:GetAQIResponse xmlns:ns0="http://smartcity.air-quality.soap">
+         <ns0:AirQualityResult>
+            <ns0:zone>downtown</ns0:zone>
+            <ns0:aqi>85</ns0:aqi>
+            <ns0:category>Moderate</ns0:category>
+            <ns0:timestamp>2024-12-04T10:30:00</ns0:timestamp>
+            <ns0:description>Qualité acceptable pour la plupart</ns0:description>
+         </ns0:AirQualityResult>
+      </ns0:GetAQIResponse>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </response>
+    </example>
+
+    <!-- Exemple 2: GetPollutants -->
+    <example name="GetPollutants" description="Obtenir les polluants d'une zone">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:GetPollutants>
+         <tns:zone>industrial</tns:zone>
+      </tns:GetPollutants>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+        <response>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+   <soapenv:Body>
+      <ns0:GetPollutantsResponse xmlns:ns0="http://smartcity.air-quality.soap">
+         <ns0:PollutantList>
+            <ns0:zone>industrial</ns0:zone>
+            <ns0:pollutants>
+               <ns0:Pollutant>
+                  <ns0:name>PM2.5</ns0:name>
+                  <ns0:value>65.3</ns0:value>
+                  <ns0:unit>µg/m³</ns0:unit>
+                  <ns0:timestamp>2024-12-04T10:30:00</ns0:timestamp>
+                  <ns0:status>ALERT</ns0:status>
+               </ns0:Pollutant>
+               <ns0:Pollutant>
+                  <ns0:name>NO2</ns0:name>
+                  <ns0:value>78.9</ns0:value>
+                  <ns0:unit>ppb</ns0:unit>
+                  <ns0:timestamp>2024-12-04T10:30:00</ns0:timestamp>
+                  <ns0:status>ALERT</ns0:status>
+               </ns0:Pollutant>
+            </ns0:pollutants>
+            <ns0:timestamp>2024-12-04T10:30:00</ns0:timestamp>
+         </ns0:PollutantList>
+      </ns0:GetPollutantsResponse>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </response>
+    </example>
+
+    <!-- Exemple 3: CompareZones -->
+    <example name="CompareZones" description="Comparer deux zones">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:CompareZones>
+         <tns:zoneA>park</tns:zoneA>
+         <tns:zoneB>industrial</tns:zoneB>
+      </tns:CompareZones>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+    </example>
+
+    <!-- Exemple 4: GetHistory -->
+    <example name="GetHistory" description="Obtenir l'historique">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:GetHistory>
+         <tns:zone>downtown</tns:zone>
+         <tns:startDate>2024-12-01T00:00:00</tns:startDate>
+         <tns:endDate>2024-12-04T00:00:00</tns:endDate>
+         <tns:granularity>daily</tns:granularity>
+      </tns:GetHistory>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+    </example>
+
+    <!-- Exemple 5: FilterPollutants -->
+    <example name="FilterPollutants" description="Filtrer les polluants">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:FilterPollutants>
+         <tns:zone>downtown</tns:zone>
+         <tns:threshold>30.0</tns:threshold>
+      </tns:FilterPollutants>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+    </example>
+
+    <!-- Exemple 6: HealthCheck -->
+    <example name="HealthCheck" description="Vérifier l'état du service">
+        <request>
+            <![CDATA[
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:tns="http://smartcity.air-quality.soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:HealthCheck/>
+   </soapenv:Body>
+</soapenv:Envelope>
+            ]]>
+        </request>
+    </example>
+</soap-examples>
