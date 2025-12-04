@@ -144,6 +144,7 @@ ruff check --fix .
 
 ## 📊 Structure du projet
 
+```
 air-quality-soap-service/
 ├── main.py # Point d'entrée du service SOAP
 ├── models/ # Définitions des modèles de données
@@ -176,3 +177,4 @@ air-quality-soap-service/
 ├── requirements.txt # Dépendances Python
 ├── .env.example # Exemple de fichier de configuration environnement
 └── README.md # Documentation du projet
+```
