@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  urban-events-graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: urban-events-graphql-service
+    ports:
+      - "8004:8000"  # Port externe 8004 → Port interne 8000
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - SERVICE_NAME=urban-events-graphql-service
+      - SERVICE_PORT=8000
+    volumes:
+      - ./logs:/app/logs  # Persistence des logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - smart-city-network
+
+networks:
+  smart-city-network:
+    driver: bridge
+    name: smart-city-network

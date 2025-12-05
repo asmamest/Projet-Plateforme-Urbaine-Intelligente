@@ -3,12 +3,7 @@ Tests unitaires pour AirQualityService
 """
 import pytest
 from datetime import datetime, timedelta
-try:
-    from spyne import Fault
-except ModuleNotFoundError:
-    class Fault(Exception):
-        def __init__(self, faultstring):
-            self.faultstring = faultstring
+from spyne import Fault
 
 from services.air_quality_service import AirQualityServiceImpl
 
