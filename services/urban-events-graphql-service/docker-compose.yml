@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: urban-events-graphql-service
     ports:
-      - "8004:8000"  # Port externe 8004 → Port interne 8000
+      - "8004:8004"  # Port externe 8004 → Port interne 8000
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
