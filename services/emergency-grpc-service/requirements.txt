@@ -1,0 +1,8 @@
+grpcio
+grpcio-tools
+protobuf
+python-dotenv
+pytest
+pytest-asyncio
+python-json-logger
+prometheus-client

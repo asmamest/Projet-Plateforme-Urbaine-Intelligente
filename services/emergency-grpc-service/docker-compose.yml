@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  emergency-grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emergency-grpc-service
+    ports:
+      - "50051:50051"
+    environment:
+      - GRPC_PORT=50051
+      - LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; from protos import emergency_pb2, emergency_pb2_grpc; channel = grpc.insecure_channel('localhost:50051'); stub = emergency_pb2_grpc.EmergencyAlertServiceStub(channel); stub.HealthCheck(emergency_pb2.HealthCheckRequest())"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - smart-city-network
+
+networks:
+  smart-city-network:
+    driver: bridge
+    name: smart-city-network
