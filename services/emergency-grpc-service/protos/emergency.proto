@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package emergency;
+
+// Service principal de gestion des alertes d'urgence
+service EmergencyAlertService {
+  // Créer une nouvelle alerte
+  rpc CreateAlert(AlertRequest) returns (AlertResponse);
+  
+  // Récupérer les alertes actives d'une zone
+  rpc GetActiveAlerts(ZoneRequest) returns (AlertListResponse);
+  
+  // Mettre à jour le statut d'une alerte
+  rpc UpdateAlertStatus(StatusUpdateRequest) returns (AlertResponse);
+  
+  // Consulter l'historique des alertes
+  rpc GetAlertHistory(HistoryRequest) returns (AlertHistoryResponse);
+  
+  // S'abonner aux alertes en temps réel (streaming)
+  rpc SubscribeAlerts(SubscribeRequest) returns (stream AlertResponse);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Types d'alertes d'urgence
+enum AlertType {
+  ALERT_TYPE_UNSPECIFIED = 0;
+  ACCIDENT = 1;                // Accident de la route ou industriel
+  FIRE = 2;                    // Incendie
+  AMBULANCE_REQUEST = 3;       // Demande d'ambulance
+  MEDICAL_EMERGENCY = 4;       // Urgence médicale critique
+  NATURAL_DISASTER = 5;        // Catastrophe naturelle
+  SECURITY_THREAT = 6;         // Menace sécuritaire
+  PUBLIC_HEALTH = 7;           // Crise de santé publique
+}
+
+// Niveaux de priorité
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  LOW = 1;                     // < 30 minutes
+  MEDIUM = 2;                  // < 15 minutes
+  HIGH = 3;                    // < 8 minutes
+  CRITICAL = 4;                // < 5 minutes
+}
+
+// Statuts des alertes
+enum AlertStatus {
+  STATUS_UNSPECIFIED = 0;
+  PENDING = 1;                 // En attente d'assignation
+  IN_PROGRESS = 2;             // Intervention en cours
+  RESOLVED = 3;                // Résolue
+  CANCELLED = 4;               // Annulée
+}
+
+// Localisation géographique
+message Location {
+  double latitude = 1;         // [-90, 90]
+  double longitude = 2;        // [-180, 180]
+  string address = 3;          // Adresse complète
+  string city = 4;             // Ville
+  string zone = 5;             // Zone administrative
+}
+
+// Requête de création d'alerte
+message AlertRequest {
+  AlertType type = 1;
+  string description = 2;      // 10-1000 caractères
+  Location location = 3;
+  Priority priority = 4;
+  string reporter_name = 5;    // Nom du rapporteur
+  string reporter_phone = 6;   // Format E.164
+  int32 affected_people = 7;   // Nombre de personnes affectées
+}
+
+// Réponse alerte
+message AlertResponse {
+  string alert_id = 1;
+  AlertType type = 2;
+  string description = 3;
+  Location location = 4;
+  Priority priority = 5;
+  AlertStatus status = 6;
+  string reporter_name = 7;
+  string reporter_phone = 8;
+  int32 affected_people = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  string assigned_team = 12;
+  string notes = 13;
+}
+
+// Requête par zone
+message ZoneRequest {
+  string zone = 1;
+  AlertType type = 2;          // Optionnel
+  Priority min_priority = 3;   // Optionnel
+}
+
+// Liste d'alertes
+message AlertListResponse {
+  repeated AlertResponse alerts = 1;
+  int32 total_count = 2;
+}
+
+// Mise à jour de statut
+message StatusUpdateRequest {
+  string alert_id = 1;
+  AlertStatus new_status = 2;
+  string assigned_team = 3;
+  string notes = 4;
+}
+
+// Requête d'historique
+message HistoryRequest {
+  string zone = 1;             // Optionnel
+  AlertType type = 2;          // Optionnel
+  int64 start_date = 3;        // Timestamp Unix
+  int64 end_date = 4;          // Timestamp Unix
+  int32 limit = 5;             // Défaut: 100
+}
+
+// Réponse historique avec stats
+message AlertHistoryResponse {
+  repeated AlertResponse alerts = 1;
+  int32 total_count = 2;
+  map<string, int32> statistics = 3;
+}
+
+// Abonnement streaming
+message SubscribeRequest {
+  repeated string zones = 1;
+  repeated AlertType types = 2;
+  Priority min_priority = 3;
+}
+
+// Health check
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string version = 2;
+  int32 active_alerts = 3;
+  int32 subscribers = 4;
+}
