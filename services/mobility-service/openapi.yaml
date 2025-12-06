@@ -1,7 +1,7 @@
 components:
   schemas:
     DisponibiliteItem:
-      description: Disponibilité pour une ligne
+      description: DisponibilitÃ© pour une ligne
       properties:
         derniere_maj:
           format: date-time
@@ -11,17 +11,17 @@ components:
           title: Ligne Id
           type: string
         taux_disponibilite:
-          description: Taux de disponibilité en %
+          description: Taux de disponibilitÃ© en %
           maximum: 100.0
           minimum: 0.0
           title: Taux Disponibilite
           type: number
         vehicules_en_service:
-          description: Véhicules actuellement en service
+          description: VÃ©hicules actuellement en service
           title: Vehicules En Service
           type: integer
         vehicules_total:
-          description: Nombre total de véhicules
+          description: Nombre total de vÃ©hicules
           title: Vehicules Total
           type: integer
       required:
@@ -33,7 +33,7 @@ components:
       title: DisponibiliteItem
       type: object
     DisponibiliteResponse:
-      description: Réponse globale de disponibilité
+      description: RÃ©ponse globale de disponibilitÃ©
       properties:
         disponibilites:
           items:
@@ -63,7 +63,7 @@ components:
       title: HTTPValidationError
       type: object
     HoraireItem:
-      description: Schéma représentant un horaire de passage
+      description: SchÃ©ma reprÃ©sentant un horaire de passage
       properties:
         destination:
           example: Centre-Ville
@@ -102,7 +102,7 @@ components:
       title: HoraireItem
       type: object
     HorairesResponse:
-      description: Réponse contenant la liste des horaires
+      description: RÃ©ponse contenant la liste des horaires
       properties:
         horaires:
           items:
@@ -110,7 +110,7 @@ components:
           title: Horaires
           type: array
         ligne:
-          description: Numéro de la ligne
+          description: NumÃ©ro de la ligne
           title: Ligne
           type: string
         nombre_horaires:
@@ -123,7 +123,7 @@ components:
       title: HorairesResponse
       type: object
     LigneCreate:
-      description: Schéma pour la création d'une ligne
+      description: SchÃ©ma pour la crÃ©ation d'une ligne
       properties:
         actif:
           default: true
@@ -136,18 +136,18 @@ components:
           title: Nom
           type: string
         numero:
-          description: Numéro de la ligne
+          description: NumÃ©ro de la ligne
           example: L1
           title: Numero
           type: string
         terminus_debut:
-          description: Terminus de départ
+          description: Terminus de dÃ©part
           example: Gare Centrale
           title: Terminus Debut
           type: string
         terminus_fin:
-          description: Terminus d'arrivée
-          example: Aéroport
+          description: Terminus d'arrivÃ©e
+          example: AÃ©roport
           title: Terminus Fin
           type: string
         type_transport:
@@ -164,7 +164,7 @@ components:
       title: LigneCreate
       type: object
     LigneResponse:
-      description: Schéma de réponse pour une ligne
+      description: SchÃ©ma de rÃ©ponse pour une ligne
       properties:
         actif:
           default: true
@@ -185,18 +185,18 @@ components:
           title: Nom
           type: string
         numero:
-          description: Numéro de la ligne
+          description: NumÃ©ro de la ligne
           example: L1
           title: Numero
           type: string
         terminus_debut:
-          description: Terminus de départ
+          description: Terminus de dÃ©part
           example: Gare Centrale
           title: Terminus Debut
           type: string
         terminus_fin:
-          description: Terminus d'arrivée
-          example: Aéroport
+          description: Terminus d'arrivÃ©e
+          example: AÃ©roport
           title: Terminus Fin
           type: string
         type_transport:
@@ -220,7 +220,7 @@ components:
       title: LigneResponse
       type: object
     LigneUpdate:
-      description: Schéma pour la mise à jour d'une ligne
+      description: SchÃ©ma pour la mise Ã  jour d'une ligne
       properties:
         actif:
           anyOf:
@@ -255,7 +255,7 @@ components:
       title: LigneUpdate
       type: object
     TraficItem:
-      description: État du trafic pour une ligne
+      description: Ã‰tat du trafic pour une ligne
       properties:
         ligne_id:
           title: Ligne Id
@@ -271,7 +271,7 @@ components:
           title: Retard Minutes
           type: integer
         statut:
-          description: État du trafic
+          description: Ã‰tat du trafic
           example: normal
           title: Statut
           type: string
@@ -286,7 +286,7 @@ components:
       title: TraficItem
       type: object
     TraficResponse:
-      description: Réponse globale de l'état du trafic
+      description: RÃ©ponse globale de l'Ã©tat du trafic
       properties:
         derniere_maj:
           format: date-time
@@ -328,26 +328,26 @@ components:
       title: ValidationError
       type: object
 info:
-  description: "\n    ## Service REST de Mobilité Intelligente\n    \n    Ce service\
+  description: "\n    ## Service REST de MobilitÃ© Intelligente\n    \n    Ce service\
     \ fait partie de la plateforme urbaine intelligente et fournit:\n    \n    * \U0001F4C5\
-    \ **Consultation des horaires** de transport en temps réel\n    * \U0001F6A6 **État\
-    \ du trafic** avec retards et perturbations\n    * \U0001F68C **Disponibilité\
-    \ des véhicules** par ligne\n    * \U0001F527 **Gestion CRUD complète** des lignes\
+    \ **Consultation des horaires** de transport en temps rÃ©el\n    * \U0001F6A6 **Ã‰tat\
+    \ du trafic** avec retards et perturbations\n    * \U0001F68C **DisponibilitÃ©\
+    \ des vÃ©hicules** par ligne\n    * \U0001F527 **Gestion CRUD complÃ¨te** des lignes\
     \ de transport\n    \n    ### Architecture\n    \n    - **Protocole**: REST API\
     \ (FastAPI)\n    - **Format**: JSON\n    - **Documentation**: OpenAPI 3.0\n  \
     \  - **Conteneurisation**: Docker\n    \n    ### Endpoints principaux\n    \n\
-    \    - `GET /horaires/{ligne}` - Horaires d'une ligne\n    - `GET /trafic` - État\
-    \ du trafic global\n    - `GET /disponibilite` - Disponibilité des véhicules\n\
-    \    - `GET /lignes` - Liste des lignes\n    - `POST /lignes` - Créer une ligne\n\
+    \    - `GET /horaires/{ligne}` - Horaires d'une ligne\n    - `GET /trafic` - Ã‰tat\
+    \ du trafic global\n    - `GET /disponibilite` - DisponibilitÃ© des vÃ©hicules\n\
+    \    - `GET /lignes` - Liste des lignes\n    - `POST /lignes` - CrÃ©er une ligne\n\
     \    - `PUT /lignes/{id}` - Modifier une ligne\n    - `DELETE /lignes/{id}` -\
     \ Supprimer une ligne\n    "
-  title: Service Mobilité Intelligente
+  title: Service MobilitÃ© Intelligente
   version: 1.0.0
 openapi: 3.1.0
 paths:
   /:
     get:
-      description: 'Point d''entrée principal de l''API.
+      description: 'Point d''entrÃ©e principal de l''API.
 
         Retourne les informations de base du service.'
       operationId: root__get
@@ -359,19 +359,19 @@ paths:
           description: Successful Response
       summary: Page d'accueil
       tags:
-      - Système
+      - SystÃ¨me
   /disponibilite:
     get:
-      description: 'Récupère la disponibilité des véhicules pour toutes les lignes.
+      description: 'RÃ©cupÃ¨re la disponibilitÃ© des vÃ©hicules pour toutes les lignes.
 
 
         Retourne pour chaque ligne:
 
-        - Le nombre total de véhicules
+        - Le nombre total de vÃ©hicules
 
-        - Le nombre de véhicules actuellement en service
+        - Le nombre de vÃ©hicules actuellement en service
 
-        - Le taux de disponibilité en pourcentage'
+        - Le taux de disponibilitÃ© en pourcentage'
       operationId: get_disponibilite_disponibilite_get
       responses:
         '200':
@@ -380,23 +380,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/DisponibiliteResponse'
           description: Successful Response
-      summary: Obtenir la disponibilité des véhicules
+      summary: Obtenir la disponibilitÃ© des vÃ©hicules
       tags:
-      - Disponibilité
+      - DisponibilitÃ©
   /health:
     get:
-      description: 'Endpoint de vérification de santé du service.
+      description: 'Endpoint de vÃ©rification de santÃ© du service.
 
-        Utilisé par Docker et les orchestrateurs (Kubernetes, etc.)
+        UtilisÃ© par Docker et les orchestrateurs (Kubernetes, etc.)
 
 
         Retourne:
 
-        - **status**: État du service (healthy/unhealthy)
+        - **status**: Ã‰tat du service (healthy/unhealthy)
 
         - **version**: Version de l''application
 
-        - **uptime**: Temps depuis le démarrage'
+        - **uptime**: Temps depuis le dÃ©marrage'
       operationId: health_check_health_get
       responses:
         '200':
@@ -406,26 +406,26 @@ paths:
           description: Successful Response
       summary: Health check
       tags:
-      - Système
+      - SystÃ¨me
   /horaires/{ligne}:
     get:
-      description: 'Récupère tous les horaires de passage pour une ligne donnée.
+      description: 'RÃ©cupÃ¨re tous les horaires de passage pour une ligne donnÃ©e.
 
 
-        - **ligne**: Numéro de la ligne à consulter
+        - **ligne**: NumÃ©ro de la ligne Ã  consulter
 
 
-        Retourne la liste complète des horaires avec les informations de départ, arrivée
+        Retourne la liste complÃ¨te des horaires avec les informations de dÃ©part, arrivÃ©e
         et quai.'
       operationId: get_horaires_horaires__ligne__get
       parameters:
-      - description: 'Numéro de la ligne (ex: L1, B15)'
+      - description: 'NumÃ©ro de la ligne (ex: L1, B15)'
         example: L1
         in: path
         name: ligne
         required: true
         schema:
-          description: 'Numéro de la ligne (ex: L1, B15)'
+          description: 'NumÃ©ro de la ligne (ex: L1, B15)'
           title: Ligne
           type: string
       responses:
@@ -446,7 +446,7 @@ paths:
       - Horaires
   /lignes:
     get:
-      description: Récupère la liste complète de toutes les lignes de transport disponibles.
+      description: RÃ©cupÃ¨re la liste complÃ¨te de toutes les lignes de transport disponibles.
       operationId: get_lignes_lignes_get
       responses:
         '200':
@@ -462,18 +462,18 @@ paths:
       tags:
       - Lignes
     post:
-      description: 'Crée une nouvelle ligne de transport dans le système.
+      description: 'CrÃ©e une nouvelle ligne de transport dans le systÃ¨me.
 
 
-        - **numero**: Numéro unique de la ligne (ex: L1, B15)
+        - **numero**: NumÃ©ro unique de la ligne (ex: L1, B15)
 
         - **nom**: Nom descriptif de la ligne
 
-        - **type_transport**: Type de véhicule (bus, metro, train, tramway)
+        - **type_transport**: Type de vÃ©hicule (bus, metro, train, tramway)
 
-        - **terminus_debut**: Station de départ
+        - **terminus_debut**: Station de dÃ©part
 
-        - **terminus_fin**: Station d''arrivée'
+        - **terminus_fin**: Station d''arrivÃ©e'
       operationId: create_ligne_lignes_post
       requestBody:
         content:
@@ -494,23 +494,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Créer une nouvelle ligne
+      summary: CrÃ©er une nouvelle ligne
       tags:
       - Lignes
   /lignes/{id}:
     delete:
-      description: 'Supprime définitivement une ligne du système.
+      description: 'Supprime dÃ©finitivement une ligne du systÃ¨me.
 
 
-        **Attention**: Cette action est irréversible.'
+        **Attention**: Cette action est irrÃ©versible.'
       operationId: delete_ligne_lignes__id__delete
       parameters:
-      - description: Identifiant de la ligne à supprimer
+      - description: Identifiant de la ligne Ã  supprimer
         in: path
         name: id
         required: true
         schema:
-          description: Identifiant de la ligne à supprimer
+          description: Identifiant de la ligne Ã  supprimer
           title: Id
           type: string
       responses:
@@ -526,10 +526,10 @@ paths:
       tags:
       - Lignes
     put:
-      description: 'Met à jour les informations d''une ligne existante.
+      description: 'Met Ã  jour les informations d''une ligne existante.
 
 
-        Seuls les champs fournis seront mis à jour, les autres resteront inchangés.'
+        Seuls les champs fournis seront mis Ã  jour, les autres resteront inchangÃ©s.'
       operationId: update_ligne_lignes__id__put
       parameters:
       - description: Identifiant de la ligne
@@ -559,21 +559,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Mettre à jour une ligne
+      summary: Mettre Ã  jour une ligne
       tags:
       - Lignes
   /trafic:
     get:
-      description: 'Récupère l''état du trafic en temps réel pour toutes les lignes.
+      description: 'RÃ©cupÃ¨re l''Ã©tat du trafic en temps rÃ©el pour toutes les lignes.
 
 
         Retourne pour chaque ligne:
 
-        - Le statut actuel (normal, retard, annulé, perturbé)
+        - Le statut actuel (normal, retard, annulÃ©, perturbÃ©)
 
-        - Le retard estimé en minutes
+        - Le retard estimÃ© en minutes
 
-        - Un message d''information si nécessaire'
+        - Un message d''information si nÃ©cessaire'
       operationId: get_trafic_trafic_get
       responses:
         '200':
@@ -582,6 +582,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/TraficResponse'
           description: Successful Response
-      summary: Obtenir l'état du trafic
+      summary: Obtenir l'Ã©tat du trafic
       tags:
       - Trafic

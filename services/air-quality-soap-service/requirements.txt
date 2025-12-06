@@ -1,20 +1,20 @@
 # SOAP Framework
-spyne==2.14.0
-lxml==4.9.3
+spyne
+lxml
 
 # Web Server
-gunicorn==21.2.0
+gunicorn
 
 # SOAP Client (pour tests)
-zeep==4.2.1
+zeep
 
 # Testing
-pytest==7.4.3
-pytest-cov==4.1.0
+pytest
+pytest-cov
 
 # Utilities
-requests==2.31.0
-python-dotenv==1.0.0
+requests
+python-dotenv
 
 # Linting (optionnel)
-ruff==0.1.6
+ruff
